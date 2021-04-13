@@ -16,6 +16,7 @@ import json
 import datetime
 import threading
 import logging
+import sys
 from awscli.compat import collections_abc
 
 from botocore.history import BaseHistoryHandler
@@ -52,7 +53,8 @@ class DatabaseConnection(object):
 
     def _ensure_database_setup(self):
         self._create_record_table()
-        self._try_to_enable_wal()
+        if not sys.platform == 'OpenVMS':
+            self._try_to_enable_wal()
 
     def _create_record_table(self):
         self.execute(self._CREATE_TABLE)

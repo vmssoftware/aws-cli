@@ -50,6 +50,8 @@ def get_renderer():
     """
     if platform.system() == 'Windows':
         return WindowsHelpRenderer()
+    elif platform.system() == 'OpenVMS':
+        return OpenVMSHelpRenderer()
     else:
         return PosixHelpRenderer()
 
@@ -161,6 +163,13 @@ class WindowsHelpRenderer(PagingHelpRenderer):
         kwargs['shell'] = True
         return Popen(*args, **kwargs)
 
+
+class OpenVMSHelpRenderer(PagingHelpRenderer):
+    """Render help content on a OpenVMS platform."""
+
+    def render(self, contents):
+        import pydoc
+        pydoc.plainpager(contents.decode())
 
 class HelpCommand(object):
     """

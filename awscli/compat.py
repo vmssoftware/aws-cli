@@ -241,7 +241,7 @@ def compat_shell_quote(s, platform=None):
     if platform is None:
         platform = sys.platform
 
-    if platform == "win32":
+    if platform in ("win32", "OpenVMS"):
         return _windows_shell_quote(s)
     else:
         return shlex_quote(s)

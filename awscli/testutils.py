@@ -106,16 +106,19 @@ def get_aws_cmd():
     global AWS_CMD
     import awscli
     if AWS_CMD is None:
-        # Try <repo>/bin/aws
-        repo_root = os.path.dirname(os.path.abspath(awscli.__file__))
-        aws_cmd = os.path.join(repo_root, 'bin', 'aws')
-        if not os.path.isfile(aws_cmd):
-            aws_cmd = _search_path_for_cmd('aws')
-            if aws_cmd is None:
-                raise ValueError('Could not find "aws" executable.  Either '
-                                 'make sure it is on your PATH, or you can '
-                                 'explicitly set this value using '
-                                 '"set_aws_cmd()"')
+        if sys.platform == 'OpenVMS':
+            aws_cmd = '-m awscli'
+        else:
+            # Try <repo>/bin/aws
+            repo_root = os.path.dirname(os.path.abspath(awscli.__file__))
+            aws_cmd = os.path.join(repo_root, 'bin', 'aws')
+            if not os.path.isfile(aws_cmd):
+                aws_cmd = _search_path_for_cmd('aws')
+                if aws_cmd is None:
+                    raise ValueError('Could not find "aws" executable.  Either '
+                                    'make sure it is on your PATH, or you can '
+                                    'explicitly set this value using '
+                                    '"set_aws_cmd()"')
         AWS_CMD = aws_cmd
     return AWS_CMD
 
@@ -587,6 +590,9 @@ def _escape_quotes(command):
     command = command.replace("'", '"')
     return command
 
+def _split_command(command):
+    import shlex
+    return shlex.split(command)
 
 def aws(command, collect_memory=False, env_vars=None,
         wait_for_finish=True, input_data=None, input_file=None):
@@ -639,7 +645,14 @@ def aws(command, collect_memory=False, env_vars=None,
         env = env_vars
     if input_file is None:
         input_file = PIPE
-    process = Popen(full_command, stdout=PIPE, stderr=PIPE, stdin=input_file,
+    if platform.system() == 'OpenVMS':
+        if not input_file == PIPE:
+            raise ValueError('OpenVMS does not support input file in Popen()')
+        command = [sys.executable, '-m', 'awscli'] + _split_command(command)
+        process = Popen(command, stdout=PIPE, stderr=PIPE, stdin=PIPE,
+                    shell=False, env=env)
+    else:
+        process = Popen(full_command, stdout=PIPE, stderr=PIPE, stdin=input_file,
                     shell=True, env=env)
     if not wait_for_finish:
         return process
@@ -651,6 +664,8 @@ def aws(command, collect_memory=False, env_vars=None,
         stdout, stderr = process.communicate(**kwargs)
     else:
         stdout, stderr, memory = _wait_and_collect_mem(process)
+    stdout = stdout or b""
+    stderr = stderr or b""
     return Result(process.returncode,
                   stdout.decode(stdout_encoding),
                   stderr.decode(stdout_encoding),
