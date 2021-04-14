@@ -11,6 +11,7 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 import datetime
+import os
 
 from botocore.compat import urlsplit
 from awscli.testutils import BaseAWSCommandParamsTest, mock, temporary_file
@@ -37,6 +38,7 @@ class TestPresignCommand(BaseAWSCommandParamsTest):
             "    addressing_style = %s\n" % mode
         )
         fileobj.flush()
+        os.fsync(fileobj.fileno())
         self.environ['AWS_CONFIG_FILE'] = fileobj.name
         self.driver = create_clidriver()
 
@@ -47,6 +49,7 @@ class TestPresignCommand(BaseAWSCommandParamsTest):
             "    signature_version = s3v4\n"
         )
         fileobj.flush()
+        os.fsync(fileobj.fileno())
         self.environ['AWS_CONFIG_FILE'] = fileobj.name
         self.driver = create_clidriver()
 

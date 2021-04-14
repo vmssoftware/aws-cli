@@ -12,28 +12,31 @@
 # language governing permissions and limitations under the License.
 from awscli.testutils import BaseAWSCommandParamsTest
 
+import sys
 
 class TestViewBilling(BaseAWSCommandParamsTest):
 
     prefix = 'route53domains view-billing'
 
+    time_value = str(60 * 60 * 24) if sys.platform == 'OpenVMS' else '2'
+
     def test_accepts_start(self):
-        command = self.prefix + ' --start 2'
+        command = self.prefix + ' --start ' + self.time_value
         expected_params = {
-            'Start': '2'
+            'Start': self.time_value
         }
         self.assert_params_for_cmd(command, expected_params)
 
     def test_accepts_start_time(self):
-        command = self.prefix + ' --start-time 2'
+        command = self.prefix + ' --start-time ' + self.time_value
         expected_params = {
-            'Start': '2'
+            'Start': self.time_value
         }
         self.assert_params_for_cmd(command, expected_params)
 
     def test_accepts_end_time(self):
-        command = self.prefix + ' --end-time 2'
+        command = self.prefix + ' --end-time ' + self.time_value
         expected_params = {
-            'End': '2'
+            'End': self.time_value
         }
         self.assert_params_for_cmd(command, expected_params)

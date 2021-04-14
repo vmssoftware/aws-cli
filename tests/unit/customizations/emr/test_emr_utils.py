@@ -15,6 +15,10 @@ from awscli.customizations.emr.emrutils import which
 from nose.tools import assert_equal
 from nose.tools import assert_not_equal
 
+import sys
+if sys.platform == 'OpenVMS':
+    import unittest
+    raise unittest.SkipTest('Is not supported by OpenVMS')
 
 class TestEMRutils(object):
 

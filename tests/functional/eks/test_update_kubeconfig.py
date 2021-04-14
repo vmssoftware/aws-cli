@@ -372,6 +372,7 @@ class TestUpdateKubeconfig(unittest.TestCase):
             .describe_cluster.assert_called_once_with(name='ExampleCluster')
         self.assert_config_state("default_temp", "output_single")
 
+    @unittest.skipIf(os.sys.platform == 'OpenVMS', 'OpenVMS allows file and directory with the same name')
     def test_default_path_directory(self):
         configs = []
         passed = None

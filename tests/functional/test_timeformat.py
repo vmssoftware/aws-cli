@@ -12,6 +12,7 @@
 # language governing permissions and limitations under the License.
 import json
 import datetime
+import sys
 from dateutil.tz import tzlocal
 from awscli.testutils import FileCreator, BaseCLIWireResponseTest
 from awscli.clidriver import create_clidriver
@@ -20,10 +21,12 @@ from awscli.clidriver import create_clidriver
 class TestCLITimestampParser(BaseCLIWireResponseTest):
     def setUp(self):
         super(TestCLITimestampParser, self).setUp()
+        # OpenVMS has an issue when time is near zero
+        self.time_v = 60 * 60 * 24 if sys.platform == 'OpenVMS' else 0
         self.files = FileCreator()
         self.wire_response = json.dumps({
             'builds': [{
-                'startTime': 0,
+                'startTime': self.time_v,
             }]
         }).encode('utf-8')
         self.command = ['codebuild', 'batch-get-builds', '--ids', 'foo']
@@ -38,7 +41,7 @@ class TestCLITimestampParser(BaseCLIWireResponseTest):
             'iso',
             '[default]\ncli_timestamp_format = iso8601\n')
         self.driver = create_clidriver()
-        expected_time = datetime.datetime.fromtimestamp(0).replace(
+        expected_time = datetime.datetime.fromtimestamp(self.time_v).replace(
             tzinfo=tzlocal()).isoformat()
 
         stdout, _, _ = self.run_cmd(self.command)
@@ -51,7 +54,7 @@ class TestCLITimestampParser(BaseCLIWireResponseTest):
             'none',
             '[default]\ncli_timestamp_format = none\n')
         self.driver = create_clidriver()
-        expected_time = 0
+        expected_time = self.time_v
 
         stdout, _, _ = self.run_cmd(self.command)
         json_response = json.loads(stdout)
@@ -60,7 +63,7 @@ class TestCLITimestampParser(BaseCLIWireResponseTest):
 
     def test_default(self):
         self.driver = create_clidriver()
-        expected_time = 0
+        expected_time = self.time_v
 
         stdout, _, _ = self.run_cmd(self.command)
         json_response = json.loads(stdout)

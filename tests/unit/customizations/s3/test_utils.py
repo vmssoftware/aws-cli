@@ -495,6 +495,7 @@ class TestGetFileStat(unittest.TestCase):
         with temporary_file('w') as f:
             f.write('foo')
             f.flush()
+            os.fsync(f.fileno())
             os.utime(f.name, (epoch_now, epoch_now))
             size, update_time = get_file_stat(f.name)
             self.assertEqual(size, 3)

@@ -238,7 +238,11 @@ class TestBasicCommandFunctionality(unittest.TestCase):
         # python2: aws: error: too few arguments
         # We don't care too much about the specific error message, as long
         # as it says we have a parse error.
-        self.assertIn('aws: error', p.stderr)
+        if os.sys.platform == 'OpenVMS':
+            # __main__: error
+            self.assertIn(': error', p.stderr)
+        else:
+            self.assertIn('aws: error', p.stderr)
 
     def test_help_usage_operation_level(self):
         p = aws('ec2 start-instances')
@@ -487,6 +491,7 @@ class TestGlobalArgs(BaseS3CLICommand):
                 'aws_secret_access_key=prob\n'
             )
             f.flush()
+            os.fsync(f.fileno())
             p = aws('configure list --profile from_argument',
                     env_vars=env_vars)
             # 1. We should see the profile name being set.
@@ -515,6 +520,7 @@ class TestGlobalArgs(BaseS3CLICommand):
                 'aws_secret_access_key=prob\n'
             )
             f.flush()
+            os.fsync(f.fileno())
             # Now we set the current profile via env var:
             env_vars['AWS_PROFILE'] = 'from_env_var'
             # If we specify the --profile argument, that

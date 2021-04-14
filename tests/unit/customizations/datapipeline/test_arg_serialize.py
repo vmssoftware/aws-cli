@@ -17,6 +17,7 @@ from awscli.testutils import temporary_file
 from awscli.customizations.datapipeline import QueryArgBuilder
 from dateutil.parser import parse
 
+import os
 
 # We're not interested in testing the def->api
 # translation process (that has its own test suite),
@@ -42,6 +43,7 @@ class TestPutPipelineDefinition(BaseAWSCommandParamsTest):
         with temporary_file('r+') as f:
             f.write(TEST_JSON)
             f.flush()
+            os.fsync(f.fileno())
             cmdline = self.prefix
             cmdline += ' --pipeline-id name'
             cmdline += ' --pipeline-definition file://%s' % f.name

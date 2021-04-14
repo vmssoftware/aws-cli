@@ -11,6 +11,7 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 import json
+import os
 
 from mock import ANY, Mock, call, patch
 from botocore.client import ClientError
@@ -48,6 +49,7 @@ class TestCreateSubscription(BaseAWSCommandParamsTest):
         with temporary_file('w') as f:
             f.write(policy)
             f.flush()
+            os.fsync(f.fileno())
             command = (
                 'cloudtrail create-subscription --s3-new-bucket foo '
                 '--name bar --s3-custom-policy file://{0}'.format(f.name))

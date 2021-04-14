@@ -646,7 +646,10 @@ class TestAWSCommand(BaseAWSCommandParamsTest):
         self.assertIn("Error parsing parameter '--filters': "
                       "Unable to load paramfile file://does/not/exist.json",
                       error_msg)
-        self.assertIn("No such file or directory", error_msg)
+        if sys.platform == 'OpenVMS':
+            self.assertIn("no such file or directory", error_msg)
+        else:
+            self.assertIn("No such file or directory", error_msg)
 
     def test_aws_configure_in_error_message_no_credentials(self):
         driver = create_clidriver()

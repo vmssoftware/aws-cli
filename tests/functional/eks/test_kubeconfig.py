@@ -65,6 +65,7 @@ class TestKubeconfigWriter(unittest.TestCase):
                                       "current-context: context\n"
                                       "apiVersion: v1\n")
 
+    @unittest.skipIf(os.sys.platform == 'OpenVMS', 'OpenVMS allows file and directory with the same name')
     def test_write_directory(self):
         content = OrderedDict([
             ("current-context", "context"),
@@ -142,6 +143,7 @@ class TestKubeconfigLoader(unittest.TestCase):
             Kubeconfig(empty_path, 
                        _get_new_kubeconfig_content()))
 
+    @unittest.skipIf(os.sys.platform == 'OpenVMS', 'OpenVMS allows file and directory with the same name')
     def test_load_directory(self):
         current_directory = self._temp_directory
         self.assertRaises(KubeconfigInaccessableError,

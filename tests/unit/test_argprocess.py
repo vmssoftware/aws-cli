@@ -11,6 +11,7 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 import json
+import os
 
 import mock
 from botocore import xform_name
@@ -80,6 +81,7 @@ class TestURIParams(BaseArgProcessTest):
             )
             f.write(json_argument)
             f.flush()
+            os.fsync(f.fileno())
             result = self.uri_param('event-name', p, 'file://%s' % f.name)
         self.assertEqual(result, json_argument)
 
@@ -90,6 +92,7 @@ class TestURIParams(BaseArgProcessTest):
             json_argument = json.dumps([{"Name": "instance-id", "Values": ["i-1234"]}])
             f.write(json_argument)
             f.flush()
+            os.fsync(f.fileno())
             result = self.uri_param('event-name', p, 'file://%s' % f.name)
         self.assertEqual(result, json_argument)
 

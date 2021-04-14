@@ -86,8 +86,9 @@ class TestCPCommand(BaseCPCommandTest):
 
     def test_upload_expires(self):
         full_path = self.files.create_file('foo.txt', 'mycontent')
-        cmdline = ('%s %s s3://bucket/key.txt --expires 90' %
-                   (self.prefix, full_path))
+        time_value = str(60 * 60 * 24) if os.sys.platform == 'OpenVMS' else '90'
+        cmdline = ('%s %s s3://bucket/key.txt --expires %s' %
+                   (self.prefix, full_path, time_value))
         self.parsed_responses = \
             [{'ETag': '"c8afdb36c52cf4727836669019e69222"'}]
         self.run_cmd(cmdline, expected_rc=0)
@@ -97,7 +98,7 @@ class TestCPCommand(BaseCPCommandTest):
         self.assertEqual(self.operations_called[0][0].name, 'PutObject')
         self.assertEqual(self.operations_called[0][1]['Key'], 'key.txt')
         self.assertEqual(self.operations_called[0][1]['Bucket'], 'bucket')
-        self.assertEqual(self.operations_called[0][1]['Expires'], '90')
+        self.assertEqual(self.operations_called[0][1]['Expires'], time_value)
 
     def test_upload_standard_ia(self):
         full_path = self.files.create_file('foo.txt', 'mycontent')

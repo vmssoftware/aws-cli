@@ -56,6 +56,7 @@ class TestDatabaseConnection(unittest.TestCase):
         mock_connect.assert_called_with(
             expected_location, check_same_thread=False, isolation_level=None)
 
+    @unittest.skipIf(os.sys.platform == 'OpenVMS', 'OpenVMS implementation fails enabling WAL')
     @mock.patch('awscli.compat.sqlite3.connect')
     def test_does_try_to_enable_wal(self, mock_connect):
         conn = DatabaseConnection(':memory:')
